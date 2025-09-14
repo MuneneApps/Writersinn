@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Academic Tasks | WritersInn</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+header { background: #2c3e50; color: #fff; padding: 1rem; text-align: center; }
+header h1 { margin: 0; font-size: 1.8rem; }
+main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+.task { background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; }
+.task-info { flex: 1; }
+.task-info h3 { margin: 0 0 0.5rem 0; }
+.task-info p { margin: 0.3rem 0; font-size: 0.9rem; color: #555; }
+.task button { background: #27ae60; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; margin-top: 0.5rem; }
+.task button:hover { background: #2ecc71; }
+.warning { background: #e74c3c; color: #fff; padding: 0.5rem; border-radius: 5px; margin-bottom: 1rem; text-align: center; font-size: 0.95rem; }
+.popup-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
+.popup { background: #fff; padding: 2rem; border-radius: 8px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+.popup h2 { margin-top: 0; }
+.popup input { width: 80%; padding: 0.5rem; margin: 0.5rem 0; border-radius: 5px; border: 1px solid #ccc; }
+.popup button { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 5px; border: none; cursor: pointer; }
+.subscribe-btn { background: #2980b9; color: #fff; }
+.subscribe-btn:hover { background: #3498db; }
+.close-btn { background: #e74c3c; color: #fff; }
+.close-btn:hover { background: #c0392b; }
+#get-user-id { background: #8e44ad; color: #fff; padding: 0.5rem 1rem; border-radius: 5px; border: none; cursor: pointer; margin-bottom: 2rem; }
+#get-user-id:hover { background: #9b59b6; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>WRITER BAY</h1>
+</header>
+
+<main>
+  <div class="warning">
+    ⚠️ Only members with a verified User ID can take a task. <br>
+    Task details will be sent via WhatsApp and Email. <br>
+    Submit a draft halfway before the due time. <br>
+    Click <strong>Get User ID</strong> to obtain your ID and take a task.
+  </div>
+
+  <button id="get-user-id">Get User ID</button>
+  <div id="tasks-container"></div>
+</main>
+
+<!-- Get User ID Popup -->
+<div class="popup-overlay" id="popup-userid-overlay">
+  <div class="popup">
+    <h2>Get Verified User ID</h2>
+    <input type="text" id="uid-name" placeholder="Full Name"><br>
+    <input type="email" id="uid-email" placeholder="Email"><br>
+    <input type="text" id="uid-whatsapp" placeholder="WhatsApp Number"><br>
+    <input type="text" id="uid-transaction" placeholder="MPESA Transaction Code"><br>
+    <div class="wallet-info">
+      <p>Pay KES 300 to:</p>
+      <p>Paybill: 522522</p>
+      <p>Account: 1233263110</p>
+      <p>This amount will be credited to your wallet. Strictly for verification purposes.</p>
+    </div>
+    <button class="subscribe-btn" id="uid-verify">Verify</button>
+    <button class="close-btn" id="uid-close">Close</button>
+  </div>
+</div>
+
+<!-- Take Task Popup -->
+<div class="popup-overlay" id="popup-task-overlay">
+  <div class="popup">
+    <h2 id="task-title">Enter User ID</h2>
+    <input type="text" id="task-userid" placeholder="User ID"><br>
+    <button class="subscribe-btn" id="task-submit">Submit</button>
+    <button class="close-btn" id="task-close">Close</button>
+  </div>
+</div>
+
+<script>
+// Task generation
+const tasksContainer = document.getElementById("tasks-container");
+const courses = ["Computer Science", "Nursing", "Business", "Engineering", "Mathematics", "Education", "Agriculture", "Hospitality", "TVET"];
+const assignmentTemplates = [
+  "Write a 2000-word essay on {} fundamentals.",
+  "Develop a {} project with at least 3 modules and documentation.",
+  "Analyze and present a case study related to {}.",
+  "Prepare a research report on recent advancements in {}.",
+  "Solve a set of 10 {} practice problems with explanations.",
+  "Create a presentation summarizing key {} concepts.",
+  "Develop a database model for a {} scenario.",
+  "Write a reflective journal on {} learning experiences.",
+  "Perform a small experiment related to {} and document results.",
+  "Design a poster explaining {} principles."
+];
+
+// Generate 50 tasks
+for(let i=1;i<=50;i++){
+  const course = courses[Math.floor(Math.random()*courses.length)];
+  const template = assignmentTemplates[Math.floor(Math.random()*assignmentTemplates.length)];
+  const assignmentDetail = template.replace("{}", course);
+
+  const taskDiv = document.createElement("div");
+  taskDiv.className = "task";
+  taskDiv.innerHTML = `
+    <div class="task-info">
+      <h3>${course} Task #${i}</h3>
+      <p><strong>Details:</strong> ${assignmentDetail}</p>
+    </div>
+    <button onclick="openTaskPopup(${i})">Take Task</button>
+  `;
+  tasksContainer.appendChild(taskDiv);
+}
+
+// Get User ID popup
+const popupUserOverlay = document.getElementById("popup-userid-overlay");
+const uidClose = document.getElementById("uid-close");
+const uidVerify = document.getElementById("uid-verify");
+const uidName = document.getElementById("uid-name");
+const uidEmail = document.getElementById("uid-email");
+const uidWhatsapp = document.getElementById("uid-whatsapp");
+const uidTransaction = document.getElementById("uid-transaction");
+
+document.getElementById("get-user-id").onclick = () => {
+  popupUserOverlay.style.display = "flex";
+}
+
+uidClose.onclick = () => {
+  popupUserOverlay.style.display = "none";
+  uidName.value = "";
+  uidEmail.value = "";
+  uidWhatsapp.value = "";
+  uidTransaction.value = "";
+}
+
+uidVerify.onclick = () => {
+  if(uidName.value && uidEmail.value && uidWhatsapp.value && uidTransaction.value){
+    alert("We have received your details. You will receive your User ID on WhatsApp and Email and can apply for any task within 5 minutes.");
+    popupUserOverlay.style.display = "none";
+    uidName.value = "";
+    uidEmail.value = "";
+    uidWhatsapp.value = "";
+    uidTransaction.value = "";
+  } else {
+    alert("Please fill all fields including MPESA transaction code.");
+  }
+}
+
+// Take Task popup
+const popupTaskOverlay = document.getElementById("popup-task-overlay");
+const taskClose = document.getElementById("task-close");
+const taskSubmit = document.getElementById("task-submit");
+const taskUserId = document.getElementById("task-userid");
+const taskTitle = document.getElementById("task-title");
+
+function openTaskPopup(taskId){
+  popupTaskOverlay.style.display = "flex";
+  taskTitle.textContent = `Enter User ID for Task #${taskId}`;
+  taskUserId.value = "";
+}
+
+taskClose.onclick = () => {
+  popupTaskOverlay.style.display = "none";
+  taskUserId.value = "";
+}
+
+taskSubmit.onclick = () => {
+  if(!taskUserId.value){
+    alert("Please enter your User ID.");
+    return;
+  }
+  alert("If verified, the Task will be sent to your WhatsApp and Email immediately. Thank you.");
+  popupTaskOverlay.style.display = "none";
+  taskUserId.value = "";
+}
+</script>
+
+</body>
+</html>
