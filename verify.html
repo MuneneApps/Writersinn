@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verify Login - WritersInn</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+    .loader { border: 6px solid #f3f3f3; border-radius: 50%; border-top: 6px solid #3498db; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .message { margin-top: 20px; font-size: 1.2em; }
+  </style>
+</head>
+<body>
+  <h1>Verifying your login...</h1>
+  <div class="loader"></div>
+  <div class="message" id="message">Please wait.</div>
+
+  <script>
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+
+      if (!token) {
+        document.getElementById('message').textContent = "Invalid verification link.";
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:3000/verify/${token}`);
+        const data = await res.json();
+
+        if (res.ok && data.user) {
+          // Store user info
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('userEmail', data.user.email);
+
+          // Redirect to dashboard
+          document.getElementById('message').textContent = "Login successful! Redirecting...";
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1500);
+        } else {
+          document.getElementById('message').textContent = data.error || "Verification failed.";
+        }
+      } catch (err) {
+        document.getElementById('message').textContent = "An error occurred. Please try again.";
+        console.error(err);
+      }
+    })();
+  </script>
+</body>
+</html>

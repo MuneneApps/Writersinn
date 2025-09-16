@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - WritersInn</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+  h1, h2 { margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+  button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; background-color: #007bff; color: white; }
+  button:hover { background-color: #0056b3; }
+  .section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+  input, textarea { width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc; }
+</style>
+</head>
+<body>
+
+<h1>Admin Dashboard</h1>
+
+<!-- Add Task Section -->
+<div class="section">
+  <h2>Add New Task</h2>
+  <form id="add-task-form" enctype="multipart/form-data">
+    <input type="text" id="task-title" placeholder="Task Title" required />
+    <textarea id="task-description" placeholder="Task Description" rows="4" required></textarea>
+    <input type="number" id="task-price" placeholder="Task Price ($)" required />
+    <label>Task File:</label>
+    <input type="file" id="task-file" required />
+    <button type="submit">Add Task</button>
+  </form>
+</div>
+
+<!-- Users Section -->
+<div class="section">
+  <h2>All Users</h2>
+  <table id="users-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Subscribed</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>Loading...</tbody>
+  </table>
+  <button onclick="exportSubscribed()">Export Subscribed Users CSV</button>
+</div>
+
+<script>
+const API_BASE = "http://localhost:3000";
+const ADMIN_SECRET = "Mun7808kel..";
+
+// Load all users
+async function loadUsers() {
+  try {
+    const res = await fetch(`${API_BASE}/users`, { headers: { "x-admin-secret": ADMIN_SECRET } });
+    const users = await res.json();
+    const tbody = document.querySelector("#users-table tbody");
+    if (!users || users.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='5'>No users found.</td></tr>";
+      return;
+    }
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>${u.name}</td>
+        <td>${u.email}</td>
+        <td>${u.phone}</td>
+        <td>${u.subscribed ? "Yes" : "No"}</td>
+        <td>
+          <button onclick="toggleSubscription('${u.email}', ${u.subscribed})">
+            ${u.subscribed ? "Unsubscribe" : "Subscribe"}
+          </button>
+        </td>
+      </tr>
+    `).join("");
+  } catch (err) {
+    console.error("Error loading users:", err);
+    alert("Failed to load users");
+  }
+}
+
+// Toggle subscription
+async function toggleSubscription(email, currentStatus) {
+  try {
+    const res = await fetch(`${API_BASE}/admin/mark-subscribed`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-secret": ADMIN_SECRET },
+      body: JSON.stringify({ email, subscribed: !currentStatus })
+    });
+    const data = await res.json();
+    alert(data.message || "Subscription updated");
+    loadUsers();
+  } catch (err) {
+    alert("Error updating subscription: " + err.message);
+  }
+}
+
+// Export subscribed users CSV
+async function exportSubscribed() {
+  try {
+    const res = await fetch(`${API_BASE}/admin/export-subscribed`, { headers: { "x-admin-secret": ADMIN_SECRET } });
+    if (res.ok) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "subscribed_users.csv";
+      a.click();
+    } else {
+      const data = await res.json();
+      alert(data.error || "Export failed");
+    }
+  } catch (err) {
+    alert("Error exporting CSV: " + err.message);
+  }
+}
+
+// Add Task
+document.getElementById("add-task-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const title = document.getElementById("task-title").value.trim();
+  const description = document.getElementById("task-description").value.trim();
+  const price = document.getElementById("task-price").value.trim();
+  const file = document.getElementById("task-file").files[0];
+
+  if (!title || !description || !price || !file) return alert("All fields are required.");
+
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("description", description);
+  formData.append("price", price);
+  formData.append("file", file);
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/add-task`, {
+      method: "POST",
+      headers: { "x-admin-secret": ADMIN_SECRET }, // do NOT set Content-Type manually
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert("Task added successfully!");
+      document.getElementById("add-task-form").reset();
+    } else {
+      alert(data.error || "Failed to add task.");
+    }
+  } catch (err) {
+    alert("Error adding task: " + (err.message || err));
+  }
+});
+
+// Initial load
+loadUsers();
+</script>
+</body>
+</html>

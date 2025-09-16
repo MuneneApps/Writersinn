@@ -62,7 +62,9 @@
 		  </button>
 	  
 		  <!-- Login/Signup Button -->
-		  <a href="writerbay.html" class="btn btn-primary ml-2">Writer Bay</a>
+		  <button id="writerBayBtn" class="btn btn-primary ml-2">Writer Bay</button>
+
+
 	  
 		  <!-- Collapsible Menu -->
 		  <div class="collapse navbar-collapse" id="ftco-nav">
@@ -555,7 +557,41 @@
 
   <!-- loader -->
   <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
-
+  <script>
+	const button = document.getElementById("writerBayBtn");
+  
+	button.addEventListener("click", async () => {
+	  // Collect user details (replace this with your form inputs)
+	  const name = prompt("Enter your name:");
+	  const email = prompt("Enter your email:");
+	  const phone = prompt("Enter your phone number:");
+  
+	  if (!name || !email || !phone) {
+		alert("All fields are required!");
+		return;
+	  }
+  
+	  try {
+		const response = await fetch("http://localhost:3000/login", {
+		  method: "POST",
+		  headers: { "Content-Type": "application/json" },
+		  body: JSON.stringify({ name, email, phone }),
+		});
+  
+		const result = await response.json();
+  
+		if (response.ok) {
+		  alert("✅ Verification email sent! Check your inbox for the magic link.");
+		} else {
+		  alert(`❌ Login error: ${result.error}`);
+		}
+	  } catch (err) {
+		console.error(err);
+		alert("❌ Something went wrong. Try again later.");
+	  }
+	});
+  </script>
+  
 
   <script src="js/jquery.min.js"></script>
   <script src="js/jquery-migrate-3.0.1.min.js"></script>

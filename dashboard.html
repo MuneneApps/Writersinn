@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Writer Dashboard</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+  h2 { margin-top: 30px; }
+  .task-card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  button { padding: 8px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+  button:hover { background-color: #0056b3; }
+  button:disabled { background-color: #aaa; cursor: not-allowed; }
+  input[type="file"] { margin-top: 5px; }
+</style>
+</head>
+<body>
+
+<h1>Welcome, <span id="user-name"></span>!</h1>
+
+<h2>Available Tasks</h2>
+<div id="available-tasks">Loading...</div>
+
+<h2>My Assignments</h2>
+<div id="assigned-tasks">Loading...</div>
+
+<h2>My Balance</h2>
+<div id="balance-section">
+  <p>Balance: $<span id="user-balance">0</span></p>
+  <button id="withdraw-btn">Withdraw</button>
+</div>
+
+<script>
+const API_BASE = "http://localhost:3000";
+let user = JSON.parse(localStorage.getItem("user") || "{}");
+let userEmail = user.email;
+
+if (!userEmail) {
+  alert("User not logged in. Redirecting to homepage.");
+  window.location.href = "index.html";
+} else {
+  document.getElementById("user-name").innerText = user.name || "";
+  loadDashboard();
+}
+
+async function loadDashboard() {
+  document.getElementById("available-tasks").innerHTML = "Loading...";
+  document.getElementById("assigned-tasks").innerHTML = "Loading...";
+
+  try {
+    // Get assignments
+    const assignedRes = await fetch(`${API_BASE}/assignments/${userEmail}`);
+    const assignments = await assignedRes.json();
+    const hasPendingOrCompleted = assignments.some(a => ["pending","completed"].includes(a.status));
+
+    // Calculate balance
+    let completedBalance = 0;
+    assignments.forEach(a => {
+      if (a.status === "completed" && a.task?.price) completedBalance += Number(a.task.price);
+    });
+    document.getElementById("user-balance").innerText = (Number(user.balance || 0) + completedBalance).toFixed(2);
+
+    // Render assigned tasks
+    document.getElementById("assigned-tasks").innerHTML = assignments.length ? assignments.map(a => `
+      <div class="task-card">
+        <h4>${a.task?.title || "No title"}</h4>
+        <p>${a.task?.description || ""}</p>
+        <p>Price: $${a.task?.price || 0}</p>
+        <p>Status: ${a.status}</p>
+        ${a.status === "pending" ? `
+          <form onsubmit="submitTask(event, '${a.id}')">
+            <input type="file" name="file" required />
+            <button type="submit">Submit Task</button>
+          </form>
+        ` : ""}
+      </div>
+    `).join("") : "<p>No assignments yet.</p>";
+
+    // Get available tasks
+    const availableRes = await fetch(`${API_BASE}/available-tasks/${userEmail}`);
+    const tasks = await availableRes.json();
+
+    document.getElementById("available-tasks").innerHTML = tasks.length ? tasks.map(t => `
+      <div class="task-card">
+        <h4>${t.title}</h4>
+        <p>${t.description}</p>
+        <p>Price: $${t.price || 0}</p>
+        <button onclick="takeTask('${t.id}')" ${hasPendingOrCompleted ? "disabled" : ""}>
+          ${hasPendingOrCompleted ? "⚠ Wait 3 days" : "Take Task"}
+        </button>
+      </div>
+    `).join("") : "<p>No tasks available currently.</p>";
+
+  } catch (err) {
+    console.error(err);
+    alert("Error loading dashboard: " + (err.message || err));
+  }
+}
+
+async function takeTask(taskId) {
+  try {
+    const res = await fetch(`${API_BASE}/take-task`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: userEmail, task_id: taskId })
+    });
+
+    const data = await res.json();
+    if (data.error) alert(data.error);
+    else alert(data.message);
+
+    loadDashboard();
+  } catch (err) {
+    console.error(err);
+    alert("Error taking task: " + (err.message || err));
+  }
+}
+
+async function submitTask(e, assignmentId) {
+  e.preventDefault();
+  const fileInput = e.target.querySelector("input[type='file']");
+  if (!fileInput.files.length) return alert("Select a file");
+
+  const formData = new FormData();
+  formData.append("email", userEmail);
+  formData.append("assignment_id", assignmentId);
+  formData.append("file", fileInput.files[0]);
+
+  try {
+    const res = await fetch(`${API_BASE}/submit-task`, { method: "POST", body: formData });
+    const data = await res.json();
+    if (data.error) return alert(data.error);
+    alert(data.message);
+    loadDashboard();
+  } catch (err) {
+    alert("Error submitting task: " + err.message);
+  }
+}
+
+// Withdraw button
+document.getElementById("withdraw-btn").addEventListener("click", () => {
+  alert("Withdrawal process not implemented yet.");
+});
+</script>
+</body>
+</html>
