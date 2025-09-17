@@ -154,6 +154,9 @@ app.post("/take-task", async (req, res) => {
           ${task.description}<br/>
           <p><strong>Instructions:</strong></p>
           <ul>
+           <li><b>WRITE AN ESSAY ON THE ABOVE TOPIC</b></li>
+           <br>
+           <li>"--------------------------------------------</li>
   <li>AI similarity/plagiarism must be 0% (checked via Turnitin/Urkund).</li>
   <li>Word count: minimum 2500 words, maximum 3000 words (excluding references and appendices).</li>
   <li>Formatting: APA 7th edition style (in-text citations & reference list).</li>
