@@ -5,30 +5,119 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Writer Dashboard</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-  h2 { margin-top: 30px; }
-  .task-card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  button { padding: 8px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+  body { 
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    background: #f5f5f5; 
+  }
+  header {
+    background: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header h1 {
+    font-size: 18px;
+    margin: 0;
+  }
+  nav {
+    display: flex;
+    gap: 15px;
+  }
+  nav a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  nav a:hover { text-decoration: underline; }
+
+  /* Mobile menu */
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+  }
+  .menu-toggle span {
+    height: 3px;
+    width: 25px;
+    background: #fff;
+    margin: 4px 0;
+    border-radius: 3px;
+  }
+  @media (max-width: 768px) {
+    nav {
+      display: none;
+      flex-direction: column;
+      background: #007bff;
+      position: absolute;
+      top: 50px;
+      left: 0;
+      width: 100%;
+    }
+    nav.show { display: flex; }
+    .menu-toggle { display: flex; }
+  }
+
+  main { padding: 20px; }
+  h2 { margin-top: 20px; }
+  .task-card { 
+    background: white; 
+    padding: 15px; 
+    margin-bottom: 15px; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+  }
+  button { 
+    padding: 8px 12px; 
+    background-color: #007bff; 
+    color: white; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+  }
   button:hover { background-color: #0056b3; }
   button:disabled { background-color: #aaa; cursor: not-allowed; }
   input[type="file"] { margin-top: 5px; }
+
+  /* Hide all sections by default */
+  section { display: none; }
+  section.active { display: block; }
 </style>
 </head>
 <body>
 
-<h1>Welcome, <span id="user-name"></span>!</h1>
+<header>
+  <h1>Welcome, <span id="user-name"></span>!</h1>
+  <div class="menu-toggle" id="menu-toggle">
+    <span></span><span></span><span></span>
+  </div>
+  <nav id="navbar">
+    <a data-section="available-tasks">Available Tasks</a>
+    <a data-section="assigned-tasks">My Assignments</a>
+    <a data-section="balance-section">My Balance</a>
+    <a id="withdraw-btn">Withdraw</a>
+  </nav>
+</header>
 
-<h2>Available Tasks</h2>
-<div id="available-tasks">Loading...</div>
+<main>
+  <section id="available-tasks" class="active">
+    <h2>Available Tasks</h2>
+    <div id="available-tasks-content">Loading...</div>
+  </section>
 
-<h2>My Assignments</h2>
-<div id="assigned-tasks">Loading...</div>
+  <section id="assigned-tasks">
+    <h2>My Assignments</h2>
+    <div id="assigned-tasks-content">Loading...</div>
+  </section>
 
-<h2>My Balance</h2>
-<div id="balance-section">
-  <p>Balance: $<span id="user-balance">0</span></p>
-  <button id="withdraw-btn">Withdraw</button>
-</div>
+  <section id="balance-section">
+    <h2>My Balance</h2>
+    <p>Balance: $<span id="user-balance">0</span></p>
+  </section>
+</main>
 
 <script>
 const API_BASE = "https://writersinn-1.onrender.com";
@@ -44,9 +133,28 @@ if (!userEmail) {
   loadDashboard();
 }
 
+// Section toggling
+const navLinks = document.querySelectorAll("nav a[data-section]");
+const sections = document.querySelectorAll("main section");
+navLinks.forEach(link => {
+  link.addEventListener("click", () => {
+    const target = link.getAttribute("data-section");
+    sections.forEach(sec => sec.classList.remove("active"));
+    document.getElementById(target).classList.add("active");
+
+    // Close mobile nav
+    document.getElementById("navbar").classList.remove("show");
+  });
+});
+
+// Mobile menu toggle
+document.getElementById("menu-toggle").addEventListener("click", () => {
+  document.getElementById("navbar").classList.toggle("show");
+});
+
 async function loadDashboard() {
-  document.getElementById("available-tasks").innerHTML = "Loading...";
-  document.getElementById("assigned-tasks").innerHTML = "Loading...";
+  document.getElementById("available-tasks-content").innerHTML = "Loading...";
+  document.getElementById("assigned-tasks-content").innerHTML = "Loading...";
 
   try {
     // Get assignments
@@ -62,7 +170,7 @@ async function loadDashboard() {
     document.getElementById("user-balance").innerText = (Number(user.balance || 0) + completedBalance).toFixed(2);
 
     // Render assigned tasks
-    document.getElementById("assigned-tasks").innerHTML = assignments.length ? assignments.map(a => `
+    document.getElementById("assigned-tasks-content").innerHTML = assignments.length ? assignments.map(a => `
       <div class="task-card">
         <h4>${a.task?.title || "No title"}</h4>
         <p>${a.task?.description || ""}</p>
@@ -81,7 +189,7 @@ async function loadDashboard() {
     const availableRes = await fetch(`${API_BASE}/available-tasks/${userEmail}`);
     const tasks = await availableRes.json();
 
-    document.getElementById("available-tasks").innerHTML = tasks.length ? tasks.map(t => `
+    document.getElementById("available-tasks-content").innerHTML = tasks.length ? tasks.map(t => `
       <div class="task-card">
         <h4>${t.title}</h4>
         <p>${t.description}</p>
