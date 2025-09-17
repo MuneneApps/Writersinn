@@ -1,5 +1,4 @@
 
-
 import axios from "axios";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -13,7 +12,6 @@ import crypto from "crypto";
 import nodemailer from "nodemailer";
 import multer from "multer";
 import path from "path";
-
 
 dotenv.config();
 const app = express();
@@ -32,6 +30,9 @@ const transporter = nodemailer.createTransport({
 // Fix __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// ✅ Serve static files (verify.html, dashboard.html, etc.)
+app.use(express.static(path.join(__dirname)));
 
 // Multer setup (for both adding tasks and submitting tasks)
 const storage = multer.diskStorage({
