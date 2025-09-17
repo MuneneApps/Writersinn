@@ -149,15 +149,29 @@ app.post("/take-task", async (req, res) => {
         subject: `New Task Assigned: ${task.title}`,
         html: `
           <p>Hello ${user.name},</p>
-          <p>Your task has been assigned successfully.</p>
+          <p>This task has been assigned successfully.</p>
           <strong>${task.title}</strong><br/>
           ${task.description}<br/>
           <p><strong>Instructions:</strong></p>
           <ul>
-            <li>No use of AI</li>
-            <li>300 words strictly</li>
-            <li>APA7 format</li>
-          </ul>
+  <li>AI similarity/plagiarism must be 0% (checked via Turnitin/Urkund).</li>
+  <li>Word count: minimum 2500 words, maximum 3000 words (excluding references and appendices).</li>
+  <li>Formatting: APA 7th edition style (in-text citations & reference list).</li>
+  <li>Line spacing: 1.5 throughout the document.</li>
+  <li>Font: Times New Roman, size 12.</li>
+  <li>Margins: 1 inch (2.54 cm) on all sides.</li>
+  <li>Include a cover page with: Student Name, Registration Number, Course Title, Instructor’s Name, and Submission Date.</li>
+  <li>Include page numbers at the bottom center of each page.</li>
+  <li>Use proper headings and subheadings (APA style levels).</li>
+  <li>Figures and tables must be numbered, titled, and referenced in the text.</li>
+  <li>All references must be from credible sources (journals, books, or official publications; avoid blogs/Wikipedia).</li>
+  <li>Proofread to ensure there are no grammar or spelling errors.</li>
+  <li>File format: Microsoft Word (.docx). PDF submissions will not be accepted unless specified.</li>
+  <li>Submission deadline is strict — late submissions will attract penalties.</li>
+  <li>Ensure the document is your original work; academic integrity rules apply.</li>
+  <li>The essay is due in 4hrs </li>
+</ul>
+
         `
       });
   
