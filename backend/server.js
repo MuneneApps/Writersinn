@@ -32,7 +32,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // ✅ Serve static files (verify.html, dashboard.html, etc.)
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(__dirname));
+
 
 // Multer setup (for both adding tasks and submitting tasks)
 const storage = multer.diskStorage({
