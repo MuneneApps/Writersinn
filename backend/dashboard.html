@@ -193,7 +193,7 @@ async function loadDashboard() {
       <div class="task-card">
         <h4>${t.title}</h4>
         <p>${t.description}</p>
-        <p>Price: $${t.price || 0}</p>
+        <p>Price: KSH${t.price || 0}</p>
         <button onclick="takeTask('${t.id}')" ${hasPendingOrCompleted ? "disabled" : ""}>
           ${hasPendingOrCompleted ? "⚠ Wait 3 days" : "Take Task"}
         </button>
