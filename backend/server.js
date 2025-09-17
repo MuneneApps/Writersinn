@@ -284,24 +284,16 @@ app.get("/users", async (req, res) => {
   res.json(data);
 });
 
-// ✅ Server Startup
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-  if (process.env.NODE_ENV === "production") {
-    console.log(`✅ Server running at https://writersinn.onrender.com`);
-  } else {
-    console.log(`✅ Server running at http://localhost:${PORT}`);
-  }
+  console.log(`✅ Server running on https://writersinn-1.onrender.com`);
 });
 
 // ✅ Login (magic link)
 app.post("/login", async (req, res) => {
   try {
     const { name, email, phone } = req.body;
-    if (!name || !email || !phone) {
-      return res.status(400).json({ error: "Name, email, and phone are required" });
-    }
+    if (!name || !email || !phone) return res.status(400).json({ error: "Name, email, and phone are required" });
 
     // Check if user exists
     let { data: user } = await supabase.from("users").select("*").eq("email", email).single();
@@ -320,21 +312,14 @@ app.post("/login", async (req, res) => {
     // Create a magic login token
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-    await supabase
-      .from("sessions")
-      .insert([{ user_id: user.id, token, expires_at: expiresAt.toISOString() }]);
+    await supabase.from("sessions").insert([{ user_id: user.id, token, expires_at: expiresAt.toISOString() }]);
 
     const verifyUrl = `${process.env.FRONTEND_ORIGIN}/verify.html?token=${token}`;
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
       subject: "WritersInn Login Verification",
-      html: `
-        <p>Hello ${user.name},</p>
-        <p>Click the link to login:</p>
-        <a href="${verifyUrl}">${verifyUrl}</a>
-        <p>Expires in 15 minutes.</p>
-      `,
+      html: `<p>Hello ${user.name},</p><p>Click the link to login:</p><a href="${verifyUrl}">${verifyUrl}</a><p>Expires in 15 minutes.</p>`,
     });
 
     res.json({ message: "✅ Verification email sent" });
@@ -361,6 +346,7 @@ app.get("/verify/:token", async (req, res) => {
 
     if (!user) return res.status(404).json({ error: "User not found" });
 
+    // Return user object with proper subscribed status
     res.json({ message: "✅ Login successful", user });
   } catch (err) {
     res.status(500).json({ error: err.message });
