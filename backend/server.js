@@ -157,6 +157,8 @@ app.post("/take-task", async (req, res) => {
            <li><b>WRITE AN ESSAY ON THE ABOVE TOPIC</b></li>
            <br>
            <li>"--------------------------------------------</li>
+           <li>ALWAYS LOGIN INTO THE ACCOUNT INORDER TO SUBMIT A TASK </li>
+           <LI>SEND LOGIN LINK FROM OUR WESITE TO LOGIN : www.writersinn.co.ke </LI>
   <li>AI similarity/plagiarism must be 0% (checked via Turnitin/Urkund).</li>
   <li>Word count: minimum 2500 words, maximum 3000 words (excluding references and appendices).</li>
   <li>Formatting: APA 7th edition style (in-text citations & reference list).</li>
