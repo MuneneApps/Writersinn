@@ -562,9 +562,8 @@
   
 	// Detect environment
 	const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-	const API_BASE = isLocalhost 
-	  ? "http://localhost:3000" 
-	  : "https://your-backend.onrender.com"; // <-- replace with your Render backend URL
+	const API_BASE = "https://writersinn.onrender.com";
+
   
 	button.addEventListener("click", async () => {
 	  const name = prompt("Enter your name:");
