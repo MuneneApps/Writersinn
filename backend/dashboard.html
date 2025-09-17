@@ -245,11 +245,18 @@ async function submitTask(e, assignmentId) {
     alert("Error submitting task: " + err.message);
   }
 }
-
 // Withdraw button
 document.getElementById("withdraw-btn").addEventListener("click", () => {
-  alert("Withdrawal process not implemented yet.");
+  alert(
+    "💳 Withdrawals Information\n\n" +
+    "• Regular withdrawals are processed on the 10th of each month.\n\n" +
+    "• To withdraw anytime, you must be a registered WritersInn member.\n\n" +
+    "👉 Pay a subscription fee of 350 Ksh:\n" +
+    "   Paybill: 522522\n" +
+    "   Account No: 1233263110"
+  );
 });
+
 </script>
 </body>
 </html>
