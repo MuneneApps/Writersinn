@@ -560,8 +560,13 @@
   <script>
 	const button = document.getElementById("writerBayBtn");
   
+	// Detect environment
+	const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+	const API_BASE = isLocalhost 
+	  ? "http://localhost:3000" 
+	  : "https://your-backend.onrender.com"; // <-- replace with your Render backend URL
+  
 	button.addEventListener("click", async () => {
-	  // Collect user details (replace this with your form inputs)
 	  const name = prompt("Enter your name:");
 	  const email = prompt("Enter your email:");
 	  const phone = prompt("Enter your phone number:");
@@ -572,7 +577,7 @@
 	  }
   
 	  try {
-		const response = await fetch("http://localhost:3000/login", {
+		const response = await fetch(`${API_BASE}/login`, {
 		  method: "POST",
 		  headers: { "Content-Type": "application/json" },
 		  body: JSON.stringify({ name, email, phone }),
@@ -591,6 +596,7 @@
 	  }
 	});
   </script>
+  
   
 
   <script src="js/jquery.min.js"></script>
