@@ -66,25 +66,34 @@ app.post("/add-user", async (req, res) => {
   }
 });
 
-/// Add task (admin)
+// ✅ Add task (admin)
 app.post("/admin/add-task", upload.single("file"), async (req, res) => {
   try {
     const secret = req.headers["x-admin-secret"];
-    if (secret !== process.env.ADMIN_SECRET) return res.status(403).json({ error: "Unauthorized" });
+    if (secret !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
 
     const { title, description, price } = req.body;
     const file = req.file;
 
-    if (!title || !description || !price || !file)
+    if (!title || !description || !price || !file) {
       return res.status(400).json({ error: "All fields including file are required" });
+    }
 
-    // Insert task
-    const { data, error } = await supabase.from("tasks")
-      .insert([{ title, description, price: Number(price), file_path: file.filename }]);
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert([{
+        title,
+        description,
+        price: price.toString(),    // match table type (text)
+        file_path: file.filename,
+        taken: false,               // default
+        assigned_to: null           // default
+      }]);
 
     if (error) throw error;
 
-    // Return success
     res.json({ success: true, message: "✅ Task added successfully", task: data[0] });
   } catch (err) {
     console.error("Add task error:", err);

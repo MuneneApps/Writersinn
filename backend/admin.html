@@ -130,7 +130,9 @@ document.getElementById("add-task-form").addEventListener("submit", async (e) =>
   const price = document.getElementById("task-price").value.trim();
   const file = document.getElementById("task-file").files[0];
 
-  if (!title || !description || !price || !file) return alert("All fields are required.");
+  if (!title || !description || !price || !file) {
+    return alert("All fields are required.");
+  }
 
   const formData = new FormData();
   formData.append("title", title);
@@ -148,8 +150,9 @@ document.getElementById("add-task-form").addEventListener("submit", async (e) =>
     const data = await res.json();
 
     if (data.success) {
-      alert("Task added successfully!");
+      alert("✅ Task added successfully!");
       document.getElementById("add-task-form").reset();
+      loadUsers();  // optional: refresh dashboard if needed
     } else {
       alert(data.error || "Failed to add task.");
     }
@@ -157,6 +160,7 @@ document.getElementById("add-task-form").addEventListener("submit", async (e) =>
     alert("Error adding task: " + (err.message || err));
   }
 });
+
 
 // Initial load
 loadUsers();
