@@ -331,7 +331,7 @@ app.post("/login", async (req, res) => {
 });
 
 // ✅ Verify magic link
-app.get("/verify/:token", async (req, res) => {
+app.get("/verify.html/:token", async (req, res) => {
   try {
     const { token } = req.params;
     const { data: session } = await supabase.from("sessions").select("*").eq("token", token).single();
