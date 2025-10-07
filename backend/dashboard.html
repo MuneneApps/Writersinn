@@ -1,99 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writer Dashboard</title>
-<style>
-  body { 
-    font-family: Arial, sans-serif; 
-    margin: 0; 
-    background: #f5f5f5; 
-  }
-  header {
-    background: #007bff;
-    color: #fff;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  header h1 {
-    font-size: 18px;
-    margin: 0;
-  }
-  nav {
-    display: flex;
-    gap: 15px;
-  }
-  nav a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  nav a:hover { text-decoration: underline; }
-
-  /* Mobile menu */
-  .menu-toggle {
-    display: none;
-    flex-direction: column;
-    cursor: pointer;
-  }
-  .menu-toggle span {
-    height: 3px;
-    width: 25px;
-    background: #fff;
-    margin: 4px 0;
-    border-radius: 3px;
-  }
-  @media (max-width: 768px) {
-    nav {
-      display: none;
-      flex-direction: column;
-      background: #007bff;
-      position: absolute;
-      top: 50px;
-      left: 0;
-      width: 100%;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writer Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
+    header {
+      background: #007bff; color: #fff; padding: 10px 20px;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    nav.show { display: flex; }
-    .menu-toggle { display: flex; }
-  }
+    header h1 { font-size: 18px; margin: 0; }
+    nav { display: flex; gap: 15px; }
+    nav a { color: #fff; text-decoration: none; font-weight: bold; cursor: pointer; }
+    nav a:hover { text-decoration: underline; }
 
-  main { padding: 20px; }
-  h2 { margin-top: 20px; }
-  .task-card { 
-    background: white; 
-    padding: 15px; 
-    margin-bottom: 15px; 
-    border-radius: 8px; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-  }
-  button { 
-    padding: 8px 12px; 
-    background-color: #007bff; 
-    color: white; 
-    border: none; 
-    border-radius: 4px; 
-    cursor: pointer; 
-  }
-  button:hover { background-color: #0056b3; }
-  button:disabled { background-color: #aaa; cursor: not-allowed; }
-  input[type="file"] { margin-top: 5px; }
+    /* Mobile menu */
+    .menu-toggle { display: none; flex-direction: column; cursor: pointer; }
+    .menu-toggle span {
+      height: 3px; width: 25px; background: #fff;
+      margin: 4px 0; border-radius: 3px;
+    }
+    @media (max-width: 768px) {
+      nav {
+        display: none; flex-direction: column;
+        background: #007bff; position: absolute;
+        top: 50px; left: 0; width: 100%;
+      }
+      nav.show { display: flex; }
+      .menu-toggle { display: flex; }
+    }
 
-  /* Hide all sections by default */
-  section { display: none; }
-  section.active { display: block; }
-</style>
+    main { padding: 20px; }
+    h2 { margin-top: 20px; }
+    .task-card {
+      background: white; padding: 15px; margin-bottom: 15px;
+      border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 8px 12px; background-color: #007bff;
+      color: white; border: none; border-radius: 4px; cursor: pointer;
+    }
+    button:hover { background-color: #0056b3; }
+    button:disabled { background-color: #aaa; cursor: not-allowed; }
+    input[type="file"] { margin-top: 5px; }
+
+    section { display: none; }
+    section.active { display: block; }
+  </style>
 </head>
 <body>
 
 <header>
   <h1>Welcome, <span id="user-name"></span>!</h1>
-  <div class="menu-toggle" id="menu-toggle">
-    <span></span><span></span><span></span>
-  </div>
+  <div class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></div>
   <nav id="navbar">
     <a data-section="available-tasks">Available Tasks</a>
     <a data-section="assigned-tasks">My Assignments</a>
@@ -105,158 +65,161 @@
 <main>
   <section id="available-tasks" class="active">
     <h2>Available Tasks</h2>
-    <div id="available-tasks-content">Loading...</div>
+    <div id="available-tasks-content">⏳ Loading tasks...</div>
   </section>
 
   <section id="assigned-tasks">
     <h2>My Assignments</h2>
-    <div id="assigned-tasks-content">Loading...</div>
+    <div id="assigned-tasks-content">⏳ Loading assignments...</div>
   </section>
 
   <section id="balance-section">
     <h2>My Balance</h2>
-    <p>Balance: $<span id="user-balance">0</span></p>
+    <p>Balance: $<span id="user-balance">0.00</span></p>
   </section>
 </main>
 
 <script>
-const API_BASE = "https://writersinn-1.onrender.com";
+  // ================== CONFIG ==================
+  const API_BASE = "https://writersinn-1.onrender.com";
 
-let user = JSON.parse(localStorage.getItem("user") || "{}");
-let userEmail = user.email;
+  // ================== USER SESSION ==================
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userEmail = user.email;
 
-if (!userEmail) {
-  alert("User not logged in. Redirecting to homepage.");
-  window.location.href = "index.html";
-} else {
-  document.getElementById("user-name").innerText = user.name || "";
-  loadDashboard();
-}
+  if (!userEmail) {
+    alert("⚠ User not logged in. Redirecting...");
+    window.location.href = "index.html";
+  } else {
+    document.getElementById("user-name").innerText = user.name || "";
+    loadDashboard();
+  }
 
-// Section toggling
-const navLinks = document.querySelectorAll("nav a[data-section]");
-const sections = document.querySelectorAll("main section");
-navLinks.forEach(link => {
-  link.addEventListener("click", () => {
-    const target = link.getAttribute("data-section");
-    sections.forEach(sec => sec.classList.remove("active"));
-    document.getElementById(target).classList.add("active");
+  // ================== NAVIGATION ==================
+  const navLinks = document.querySelectorAll("nav a[data-section]");
+  const sections = document.querySelectorAll("main section");
 
-    // Close mobile nav
-    document.getElementById("navbar").classList.remove("show");
+  navLinks.forEach(link => {
+    link.addEventListener("click", () => {
+      const target = link.getAttribute("data-section");
+      sections.forEach(sec => sec.classList.remove("active"));
+      document.getElementById(target).classList.add("active");
+      document.getElementById("navbar").classList.remove("show"); // close mobile nav
+    });
   });
-});
 
-// Mobile menu toggle
-document.getElementById("menu-toggle").addEventListener("click", () => {
-  document.getElementById("navbar").classList.toggle("show");
-});
+  document.getElementById("menu-toggle").addEventListener("click", () => {
+    document.getElementById("navbar").classList.toggle("show");
+  });
 
-async function loadDashboard() {
-  document.getElementById("available-tasks-content").innerHTML = "Loading...";
-  document.getElementById("assigned-tasks-content").innerHTML = "Loading...";
+  // ================== DASHBOARD LOADER ==================
+  async function loadDashboard() {
+    try {
+      // Get assignments
+      const assignedRes = await fetch(`${API_BASE}/assignments/${userEmail}`);
+      const assignments = assignedRes.ok ? await assignedRes.json() : [];
 
-  try {
-    // Get assignments
-    const assignedRes = await fetch(`${API_BASE}/assignments/${userEmail}`);
-    const assignments = await assignedRes.json();
-    const hasPendingOrCompleted = assignments.some(a => ["pending","completed"].includes(a.status));
+      const hasPendingOrCompleted = assignments.some(a => ["pending", "completed"].includes(a.status));
 
-    // Calculate balance
-    let completedBalance = 0;
-    assignments.forEach(a => {
-      if (a.status === "completed" && a.task?.price) completedBalance += Number(a.task.price);
-    });
-    document.getElementById("user-balance").innerText = (Number(user.balance || 0) + completedBalance).toFixed(2);
+      // Balance = saved balance + completed tasks
+      let completedBalance = 0;
+      assignments.forEach(a => {
+        if (a.status === "completed" && a.task?.price) completedBalance += Number(a.task.price);
+      });
+      document.getElementById("user-balance").innerText =
+        (Number(user.balance || 0) + completedBalance).toFixed(2);
 
-    // Render assigned tasks
-    document.getElementById("assigned-tasks-content").innerHTML = assignments.length ? assignments.map(a => `
-      <div class="task-card">
-        <h4>${a.task?.title || "No title"}</h4>
-        <p>${a.task?.description || ""}</p>
-        <p>Price: $${a.task?.price || 0}</p>
-        <p>Status: ${a.status}</p>
-        ${a.status === "pending" ? `
-          <form onsubmit="submitTask(event, '${a.id}')">
-            <input type="file" name="file" required />
-            <button type="submit">Submit Task</button>
-          </form>
-        ` : ""}
-      </div>
-    `).join("") : "<p>No assignments yet.</p>";
+      // Render assignments
+      document.getElementById("assigned-tasks-content").innerHTML =
+        assignments.length
+          ? assignments.map(a => `
+            <div class="task-card">
+              <h4>${a.task?.title || "Untitled"}</h4>
+              <p>${a.task?.description || ""}</p>
+              <p>Price: $${a.task?.price || 0}</p>
+              <p>Status: ${a.status}</p>
+              ${a.status === "pending" ? `
+                <form onsubmit="submitTask(event, '${a.id}')">
+                  <input type="file" name="file" required />
+                  <button type="submit">Submit Task</button>
+                </form>` : ""}
+            </div>
+          `).join("")
+          : "<p>No assignments yet.</p>";
 
-    // Get available tasks
-    const availableRes = await fetch(`${API_BASE}/available-tasks/${userEmail}`);
-    const tasks = await availableRes.json();
+      // Get available tasks
+      const availableRes = await fetch(`${API_BASE}/available-tasks/${userEmail}`);
+      const tasks = availableRes.ok ? await availableRes.json() : [];
 
-    document.getElementById("available-tasks-content").innerHTML = tasks.length ? tasks.map(t => `
-      <div class="task-card">
-        <h4>${t.title}</h4>
-        <p>${t.description}</p>
-        <p>Price: KSH${t.price || 0}</p>
-        <button onclick="takeTask('${t.id}')" ${hasPendingOrCompleted ? "disabled" : ""}>
-          ${hasPendingOrCompleted ? "⚠ Wait 3 days" : "Take Task"}
-        </button>
-      </div>
-    `).join("") : "<p>No tasks available currently.</p>";
+      document.getElementById("available-tasks-content").innerHTML =
+        tasks.length
+          ? tasks.map(t => `
+            <div class="task-card">
+              <h4>${t.title}</h4>
+              <p>${t.description}</p>
+              <p>Price: KSH ${t.price || 0}</p>
+              <button onclick="takeTask('${t.id}')" ${hasPendingOrCompleted ? "disabled" : ""}>
+                ${hasPendingOrCompleted ? "⚠ Wait until task cleared" : "Take Task"}
+              </button>
+            </div>
+          `).join("")
+          : "<p>No tasks available currently.</p>";
 
-  } catch (err) {
-    console.error(err);
-    alert("Error loading dashboard: " + (err.message || err));
+    } catch (err) {
+      console.error("Dashboard error:", err);
+      alert("❌ Error loading dashboard. Please try again later.");
+    }
   }
-}
 
-async function takeTask(taskId) {
-  try {
-    const res = await fetch(`${API_BASE}/take-task`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: userEmail, task_id: taskId })
-    });
-
-    const data = await res.json();
-    if (data.error) alert(data.error);
-    else alert(data.message);
-
-    loadDashboard();
-  } catch (err) {
-    console.error(err);
-    alert("Error taking task: " + (err.message || err));
+  // ================== TASK ACTIONS ==================
+  async function takeTask(taskId) {
+    try {
+      const res = await fetch(`${API_BASE}/take-task`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userEmail, task_id: taskId })
+      });
+      const data = await res.json();
+      alert(data.error ? `❌ ${data.error}` : `✅ ${data.message}`);
+      loadDashboard();
+    } catch (err) {
+      console.error("TakeTask error:", err);
+      alert("❌ Error taking task.");
+    }
   }
-}
 
-async function submitTask(e, assignmentId) {
-  e.preventDefault();
-  const fileInput = e.target.querySelector("input[type='file']");
-  if (!fileInput.files.length) return alert("Select a file");
+  async function submitTask(e, assignmentId) {
+    e.preventDefault();
+    const fileInput = e.target.querySelector("input[type='file']");
+    if (!fileInput.files.length) return alert("⚠ Select a file first.");
 
-  const formData = new FormData();
-  formData.append("email", userEmail);
-  formData.append("assignment_id", assignmentId);
-  formData.append("file", fileInput.files[0]);
+    const formData = new FormData();
+    formData.append("email", userEmail);
+    formData.append("assignment_id", assignmentId);
+    formData.append("file", fileInput.files[0]);
 
-  try {
-    const res = await fetch(`${API_BASE}/submit-task`, { method: "POST", body: formData });
-    const data = await res.json();
-    if (data.error) return alert(data.error);
-    alert(data.message);
-    loadDashboard();
-  } catch (err) {
-    alert("Error submitting task: " + err.message);
+    try {
+      const res = await fetch(`${API_BASE}/submit-task`, { method: "POST", body: formData });
+      const data = await res.json();
+      alert(data.error ? `❌ ${data.error}` : `✅ ${data.message}`);
+      loadDashboard();
+    } catch (err) {
+      console.error("SubmitTask error:", err);
+      alert("❌ Error submitting task.");
+    }
   }
-}
-// Withdraw button
-document.getElementById("withdraw-btn").addEventListener("click", () => {
-  alert(
-    "💳 Withdrawals Information\n\n" +
-    "• Regular withdrawals are processed on the 10th of each month.\n\n" +
-    "• To withdraw anytime, you must be a registered WritersInn member.\n\n" +
-    "👉 Pay a subscription fee of 350 Ksh:\n" +
-    "   Paybill: 522522\n" +
-    "   Account No: 1233263110"
-  );
-});
 
+  // ================== WITHDRAW ==================
+  document.getElementById("withdraw-btn").addEventListener("click", () => {
+    alert(
+      "💳 Withdrawals Information\n\n" +
+      "• Regular withdrawals: processed on the 10th of each month.\n\n" +
+      "• Instant withdrawal requires WritersInn membership.\n\n" +
+      "👉 Pay subscription fee of 350 Ksh:\n" +
+      "   Paybill: 522522\n" +
+      "   Account No: 1233263110"
+    );
+  });
 </script>
 </body>
 </html>
